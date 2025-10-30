@@ -1,0 +1,27 @@
+# 小规模问题配置
+# 适用于快速测试和调试
+
+environment:
+  num_trucks: 2
+  num_drones: 2
+  num_depots: 1
+  num_customers: 10
+  
+  WT_max: 500.0
+  WD_max: 50.0
+  max_charge: 30
+  
+  horizon: 150
+  area_size: 10.0
+  road_damage_ratio: 0.2
+
+training:
+  num_episodes: 1000
+  max_episode_len: 500
+  batch_size: 128
+  min_buffer_size: 2000
+  warmup_steps: 1500
+
+logging:
+  exp_name: small_problem
+

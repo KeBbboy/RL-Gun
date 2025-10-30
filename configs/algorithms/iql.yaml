@@ -1,0 +1,35 @@
+# IQL算法特定配置
+# Independent Q-Learning
+
+algorithm:
+  name: iql
+  type: off_policy
+
+training:
+  lr: 3.0e-4              # IQL通常只有一个学习率
+  gamma: 0.95
+  tau: 0.01
+  
+  batch_size: 256
+  update_freq: 10
+  target_update_freq: 100
+  min_buffer_size: 5000
+  
+  # 探索参数
+  warmup_steps: 3000
+  epsilon_max: 1.0
+  epsilon_min: 0.1
+  epsilon_decay_steps: 30000
+  
+  # IQL是完全独立的
+  independent: true
+
+network:
+  q_network:
+    hidden_units: [512, 256]
+    activation: relu
+
+features:
+  use_per: false
+  use_iam: true
+

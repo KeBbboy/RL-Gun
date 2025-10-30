@@ -1,0 +1,113 @@
+# 默认配置文件
+# Trucks and Drones Multi-Agent RL Project
+
+# ========== 环境配置 ==========
+environment:
+  num_trucks: 3
+  num_drones: 3
+  num_depots: 1
+  num_customers: 15
+  
+  # 容量限制
+  WT_max: 1000.0      # 卡车最大载重
+  WD_max: 80.0        # 无人机最大载重
+  max_charge: 50      # 最大电量
+  
+  # 速度参数（km/min）
+  truck_speed: 0.5    # 30km/h
+  drone_speed: 1.0    # 60km/h
+  
+  # 成本参数
+  ct_cost: 1.0        # 卡车单位时间成本
+  cd_cost: 0.5        # 无人机单位时间成本
+  
+  # 时空参数
+  horizon: 200        # 时间范围（分钟）
+  area_size: 15.0     # 区域大小（千米）
+  road_damage_ratio: 0.3  # 道路损坏比例（只能由无人机访问的节点）
+  
+  # 动态节点配置
+  dynamic_nodes:
+    enable: true
+    dod: 0.0          # Degree of Dynamism (0, 0.2, 0.5, 0.7)
+    delta_t: 5        # 检查频率（分钟）
+
+# ========== 节点属性 ==========
+node:
+  customer:
+    deadline: 100.0   # 默认截止时间
+    alpha: 0.5        # 延误惩罚权重
+    beta: 30.0        # 服务收益
+  depot:
+    deadline: 480.0   # 仓库截止时间
+    alpha: 0.0        # 不产生延误惩罚
+    beta: 0.0         # 不产生服务收益
+
+# ========== 训练配置 ==========
+training:
+  num_episodes: 2000
+  max_episode_len: 1000
+  
+  # 批量和缓冲区
+  batch_size: 256
+  min_buffer_size: 5000
+  
+  # 更新频率
+  update_freq: 10           # 每隔多少步更新一次
+  target_update_freq: 100   # 目标网络更新频率
+  updates_per_call: 1       # 每次触发做几次梯度步
+  
+  # 学习率
+  lr_actor: 1.0e-4
+  lr_critic: 3.0e-4
+  
+  # 探索和正则化
+  warmup_steps: 3000        # 预热步数
+  entropy_coef: 0.01        # 熵系数
+  tau: 0.01                 # 软更新系数
+  gamma: 0.95               # 折扣因子
+  
+  # On-policy算法参数（MA2C, MAPPO）
+  rollout_len: 25           # 分段回合长度
+  ppo_epochs: 5             # PPO训练轮数
+  minibatch_size: 128       # 小批大小
+  
+  # MAPPO特定参数
+  clip_param: 0.2           # PPO裁剪参数
+  gae_lambda: 0.95          # GAE lambda
+  value_coef: 0.5           # 价值损失系数
+  
+  # PER参数
+  per_mu: 0.6               # 优先级指数
+  per_sigma: 1.0            # 采样概率指数
+  per_eta: 1.0e-6           # 避免零优先级的小常数
+  per_beta: 0.4             # 重要性采样指数
+
+# ========== 网络架构 ==========
+network:
+  actor:
+    hidden_units: [512, 256]
+    activation: relu
+  critic:
+    hidden_units: [1024, 512, 256]
+    activation: relu
+
+# ========== 特性开关 ==========
+features:
+  use_per: false            # 是否使用优先经验回放
+  use_iam: true             # 是否使用无效动作掩码
+  visualize: false          # 是否启用可视化
+  visualize_interval: 1     # 可视化间隔（每N个episode）
+
+# ========== 日志和保存 ==========
+logging:
+  log_dir: ./experiments/logs
+  save_dir: ./experiments/checkpoints
+  save_rate: 2000           # 每多少episode保存一次模型
+  exp_name: experiment      # 实验名称
+  tensorboard: true         # 是否使用TensorBoard
+
+# ========== 算法选择 ==========
+algorithm:
+  name: maddpg              # maddpg, iql, ma2c, coma, cima, mappo
+

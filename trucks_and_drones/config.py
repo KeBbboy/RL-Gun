@@ -10,7 +10,7 @@ cfg = {
         'ct_cost':       1.0,     # 卡车单位时间成本
         'cd_cost':       0.5,     # 无人机单位时间成本
         'max_charge': 50,
-        'truck_speed':   0.5,      # 30km/h（千米/小时） 0.5km/min
+        'truck_speed':   0.5,    # 30km/h（千米/小时） 0.5km/min
         'drone_speed':   1,      # 60km/h（千米/小时）  1km/min
         'horizon':       200,     # 分钟
         'area_size':     15.0,    # 千米

@@ -1,0 +1,38 @@
+# MAPPO算法特定配置
+# Multi-Agent Proximal Policy Optimization
+
+algorithm:
+  name: mappo
+  type: on_policy
+
+training:
+  lr_actor: 1.0e-4
+  lr_critic: 3.0e-4
+  gamma: 0.95
+  
+  # PPO特定参数
+  clip_param: 0.2         # PPO裁剪参数epsilon
+  gae_lambda: 0.95        # GAE lambda参数
+  value_coef: 0.5         # 价值损失系数
+  entropy_coef: 0.01      # 熵正则化系数
+  
+  # On-policy训练参数
+  rollout_len: 25         # 每次收集的轨迹长度
+  ppo_epochs: 5           # 每个rollout重复训练的轮数
+  minibatch_size: 128     # 小批大小
+  
+  # 基础参数
+  batch_size: 256
+  max_grad_norm: 0.5      # 梯度裁剪
+  
+network:
+  actor:
+    hidden_units: [512, 256]
+    activation: relu
+  critic:
+    hidden_units: [1024, 512, 256]
+    activation: relu
+
+features:
+  use_iam: true
+

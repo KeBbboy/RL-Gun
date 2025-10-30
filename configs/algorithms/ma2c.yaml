@@ -1,0 +1,29 @@
+# MA2C算法特定配置
+# Multi-Agent Actor-Critic
+
+algorithm:
+  name: ma2c
+  type: on_policy
+
+training:
+  lr_actor: 1.0e-4
+  lr_critic: 3.0e-4
+  gamma: 0.95
+  
+  rollout_len: 25
+  entropy_coef: 0.01
+  
+  # MA2C使用on-policy更新
+  batch_size: 256
+
+network:
+  actor:
+    hidden_units: [512, 256]
+    activation: relu
+  critic:
+    hidden_units: [1024, 512, 256]
+    activation: relu
+
+features:
+  use_iam: true
+

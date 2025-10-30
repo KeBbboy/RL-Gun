@@ -1,0 +1,28 @@
+# 大规模问题配置
+# 复杂场景测试
+
+environment:
+  num_trucks: 5
+  num_drones: 5
+  num_depots: 2
+  num_customers: 30
+  
+  WT_max: 1500.0
+  WD_max: 100.0
+  max_charge: 80
+  
+  horizon: 300
+  area_size: 20.0
+  road_damage_ratio: 0.3
+
+training:
+  num_episodes: 5000
+  max_episode_len: 1500
+  batch_size: 512
+  min_buffer_size: 10000
+  warmup_steps: 5000
+  update_freq: 20
+
+logging:
+  exp_name: large_problem
+

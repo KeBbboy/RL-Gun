@@ -1,0 +1,35 @@
+# CIMA算法特定配置
+# CIMA (可能是COMA的改进版本或自定义算法)
+
+algorithm:
+  name: cima
+  type: on_policy
+
+training:
+  lr_actor: 1.0e-4
+  lr_critic: 3.0e-4
+  gamma: 0.95
+  
+  # CIMA特定参数
+  td_lambda: 0.8
+  entropy_coef: 0.01
+  value_coef: 0.5
+  
+  # 训练参数
+  rollout_len: 25
+  batch_size: 256
+  
+  # 集中式训练，分布式执行
+  centralized_critic: true
+  
+network:
+  actor:
+    hidden_units: [512, 256]
+    activation: relu
+  critic:
+    hidden_units: [1024, 512, 256]
+    activation: relu
+
+features:
+  use_iam: true
+

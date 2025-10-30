@@ -1,0 +1,37 @@
+# COMA算法特定配置
+# Counterfactual Multi-Agent Policy Gradients
+
+algorithm:
+  name: coma
+  type: on_policy
+
+training:
+  lr_actor: 1.0e-4
+  lr_critic: 3.0e-4
+  gamma: 0.95
+  
+  # COMA特定参数
+  td_lambda: 0.8          # TD(λ)参数
+  entropy_coef: 0.01      # 熵正则化系数
+  value_coef: 0.5         # 价值损失系数
+  
+  # 训练参数
+  rollout_len: 25
+  batch_size: 256
+  
+  # Critic使用集中式训练
+  centralized_critic: true
+  
+network:
+  actor:
+    hidden_units: [512, 256]
+    activation: relu
+  critic:
+    hidden_units: [1024, 512, 256]
+    activation: relu
+    # COMA的critic需要输入所有智能体的动作
+    counterfactual: true
+
+features:
+  use_iam: true
+
