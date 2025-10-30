@@ -1,9 +1,6 @@
 import numpy as np
 from src.environment.core.restrictions import RestrValueObject
-from src.environment.core.common_sim_func import param_interpret, random_coordinates, max_param_val
-
-import numpy as np
-from src.environment.core.common_sim_func import param_interpret, max_param_val
+from trucks_and_drones.simulation.common_sim_func import param_interpret, random_coordinates, max_param_val
 
 class BaseNodeClass:
     """

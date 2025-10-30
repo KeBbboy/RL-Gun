@@ -45,7 +45,7 @@ node:
 
 # ========== 训练配置 ==========
 training:
-  num_episodes: 2000
+  num_episodes: 1000
   max_episode_len: 1000
   
   # 批量和缓冲区

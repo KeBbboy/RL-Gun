@@ -8,6 +8,7 @@ import os
 import sys
 import time
 import numpy as np
+from tqdm import tqdm
 
 # 添加项目根目录到路径
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -152,11 +153,28 @@ def create_trainers(algorithm, n_agents, obs_shape_n, act_space_list, global_obs
     train_cfg = config['training']
     env_cfg = config['environment']
     features = config.get('features', {})
-    
+    network_cfg = config.get('network', {})
+
     # 设置参数
     for key, value in train_cfg.items():
         setattr(args, key, value)
-    
+
+    # 设置epsilon（初始值使用epsilon_max）
+    args.epsilon = train_cfg.get('epsilon_max', 1.0)
+
+    # 设置网络参数
+    if 'actor' in network_cfg:
+        args.hidden_units_actor = network_cfg['actor'].get('hidden_units', [256, 128])
+        args.activation = network_cfg['actor'].get('activation', 'relu')
+    else:
+        args.hidden_units_actor = [256, 128]
+        args.activation = 'relu'
+
+    if 'critic' in network_cfg:
+        args.hidden_units_critic = network_cfg['critic'].get('hidden_units', [512, 256])
+    else:
+        args.hidden_units_critic = [512, 256]
+
     args.use_per = features.get('use_per', False)
     args.use_iam = features.get('use_iam', False)
     
@@ -259,6 +277,10 @@ def train(args):
     
     logger.log_text(f"Training started with {config['algorithm']['name'].upper()}")
     
+    # 创建进度条
+    pbar = tqdm(total=train_cfg['num_episodes'], desc="Training Progress", 
+                bar_format='{l_bar}{bar}| {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]')
+    
     while len(episode_rewards) <= train_cfg['num_episodes']:
         # 生成动作掩码
         if features.get('use_iam', False):
@@ -337,8 +359,8 @@ def train(args):
                     logger.log_train_step(
                         step=train_step,
                         metrics={
-                            'Critic_Loss': float(critic_loss),
-                            'Actor_Loss': float(actor_loss)
+                            'Critic损失': float(critic_loss),
+                            'Actor损失': float(actor_loss)
                         },
                         agent_index=tr.agent_index
                     )
@@ -360,8 +382,8 @@ def train(args):
                             logger.log_train_step(
                                 step=train_step,
                                 metrics={
-                                    'Critic_Loss': float(critic_loss),
-                                    'Actor_Loss': float(actor_loss)
+                                    'Critic损失': float(critic_loss),
+                                    'Actor损失': float(actor_loss)
                                 },
                                 agent_index=tr.agent_index
                             )
@@ -375,16 +397,25 @@ def train(args):
             logger.log_episode(
                 episode=len(episode_rewards)-1,
                 metrics={
-                    'Total_Reward': episode_rewards[-1],
-                    'Episode_Length': episode_step,
-                    'Total_Cost': cost_stats['total_cost'],
-                    'Travel_Cost': cost_stats['travel_cost'],
-                    'Delay_Penalty': cost_stats['delay_penalty'],
-                    'Unserved_Penalty': cost_stats['unserved_penalty'],
-                    'Served_Count': cost_stats['served_count'],
-                    'Unserved_Count': cost_stats['unserved_count'],
+                    '总奖励': episode_rewards[-1],
+                    '回合长度': episode_step,
+                    '总成本': cost_stats['total_cost'],
+                    '旅行成本': cost_stats['travel_cost'],
+                    '延迟惩罚': cost_stats['delay_penalty'],
+                    '未服务惩罚': cost_stats['unserved_penalty'],
+                    '服务数量': cost_stats['served_count'],
+                    '未服务数量': cost_stats['unserved_count'],
                 }
             )
+            
+            # 更新进度条
+            pbar.update(1)
+            pbar.set_postfix({
+                'Reward': f"{episode_rewards[-1]:.2f}",
+                'Cost': f"{cost_stats['total_cost']:.2f}",
+                'Served': f"{cost_stats['served_count']}/{cost_stats['served_count'] + cost_stats['unserved_count']}",
+                'Steps': episode_step
+            })
             
             # 打印episode摘要（每N个episode）
             if len(episode_rewards) % 10 == 0:
@@ -417,12 +448,17 @@ def train(args):
             episode_step = 0
             episode_rewards.append(0.0)
     
+    # 关闭进度条
+    pbar.close()
+    
     # 训练完成
     total_time = time.time() - start_time
     print_training_complete(total_time, train_cfg['num_episodes'])
     
     # 保存最终模型
     save_dir = config['logging']['save_dir']
+    os.makedirs(save_dir, exist_ok=True)  # 确保目录存在
+    
     for i, agent in enumerate(trainers):
         if algorithm_name == "ma2c":
             agent.policy.save_weights(f"{save_dir}/agent_{i}_ma2c_policy_final.h5")

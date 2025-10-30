@@ -1,10 +1,10 @@
 import numpy as np
 import tensorflow as tf
-from src.algorithms.utils.agent_trainer import AgentTrainer
+from src.algorithms.base import AgentTrainer
 from src.algorithms.utils.replay_buffer import ReplayBuffer
 from src.algorithms.utils.per_buffer import PrioritizedReplayBuffer
-from src.algorithms.utils.model import ActorModel, CriticModel
-from src.algorithms.utils.utils import update_target_weights
+from src.algorithms.utils.networks import ActorModel, CriticModel
+from src.algorithms.utils.helper import update_target_weights
 
 
 

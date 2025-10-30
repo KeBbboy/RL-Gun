@@ -1,7 +1,7 @@
 import numpy as np
 
 from src.environment.core.restrictions import RestrValueObject, is_None, is_not_None, none_add, none_subtract
-from src.environment.core.common_sim_func import param_interpret, random_coordinates
+from trucks_and_drones.simulation.common_sim_func import param_interpret, random_coordinates
 class Truck:
     """
     只处理位置、速度、载重，不跟电池打交道。

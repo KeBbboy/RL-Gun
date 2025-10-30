@@ -1,13 +1,21 @@
 import sys
 import os
-# ─── 在导入 pygame 之前设置，保证窗口水平+垂直居中 ─────────────────────────────────
-os.environ['SDL_VIDEO_CENTERED'] = '1'
-os.environ['SDL_VIDEO_WINDOW_POS']    = 'center'
-
 import numpy as np
-import pygame
-from pygame import Surface
 import time
+
+# 将 pygame 导入延迟到需要时再进行（可选依赖）
+try:
+    # ─── 在导入 pygame 之前设置，保证窗口水平+垂直居中 ─────────────────────────────────
+    os.environ['SDL_VIDEO_CENTERED'] = '1'
+    os.environ['SDL_VIDEO_WINDOW_POS']    = 'center'
+    import pygame
+    from pygame import Surface
+    PYGAME_AVAILABLE = True
+except ImportError:
+    PYGAME_AVAILABLE = False
+    pygame = None
+    Surface = None
+    print("⚠️  Warning: pygame not installed. Visualization will be disabled.")
 
 
 
@@ -18,11 +26,12 @@ class BaseVisualizer:
         self.temp_db = temp_db
         self.grid = temp_db.grid
         
-        # 如果未启用可视化，提前返回
-        if not self.enabled:
+        # 如果未启用可视化或pygame不可用，提前返回
+        if not self.enabled or not PYGAME_AVAILABLE:
             self.no_open_window = True
             self.paused = False
-            print("📊 Visualization disabled for this session")
+            if not self.enabled:
+                print("📊 Visualization disabled for this session")
             return
 
         # Initialize pygame
