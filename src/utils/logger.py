@@ -4,6 +4,8 @@
 """
 
 import os
+import json
+import yaml
 import tensorflow as tf
 from datetime import datetime
 from typing import Dict, Any, Optional
@@ -47,6 +49,39 @@ class TrainingLogger:
         
         # 文本日志文件
         self.log_file = os.path.join(self.log_dir, 'training.log')
+    
+    def save_config(self, config: Dict[str, Any], args: Optional[Any] = None):
+        """
+        保存训练配置到日志目录
+        
+        Args:
+            config: 配置字典
+            args: 命令行参数对象（可选）
+        """
+        # 保存完整配置为YAML格式
+        config_file = os.path.join(self.log_dir, 'config.yaml')
+        with open(config_file, 'w', encoding='utf-8') as f:
+            yaml.dump(config, f, default_flow_style=False, allow_unicode=True)
+        
+        # 保存为JSON格式（方便程序读取）
+        config_json_file = os.path.join(self.log_dir, 'config.json')
+        with open(config_json_file, 'w', encoding='utf-8') as f:
+            json.dump(config, f, indent=2, ensure_ascii=False)
+        
+        # 如果有命令行参数，也保存下来
+        if args is not None:
+            args_file = os.path.join(self.log_dir, 'args.txt')
+            with open(args_file, 'w', encoding='utf-8') as f:
+                f.write("命令行参数:\n")
+                f.write("="*50 + "\n")
+                for key, value in vars(args).items():
+                    f.write(f"{key}: {value}\n")
+        
+        print(f"💾 Configuration saved to: {self.log_dir}")
+        print(f"   - config.yaml")
+        print(f"   - config.json")
+        if args is not None:
+            print(f"   - args.txt")
     
     def log_train_step(
         self,
@@ -112,6 +147,31 @@ class TrainingLogger:
         
         with open(self.log_file, 'a', encoding='utf-8') as f:
             f.write(log_message + '\n')
+    
+    def save_training_summary(self, summary_data: Dict[str, Any]):
+        """
+        保存训练摘要信息 
+        
+        Args:
+            summary_data: 训练摘要数据，包括总时间、总episodes等
+        """
+        summary_file = os.path.join(self.log_dir, 'training_summary.json')
+        
+        # 添加时间戳
+        summary_data['end_time'] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        with open(summary_file, 'w', encoding='utf-8') as f:
+            json.dump(summary_data, f, indent=2, ensure_ascii=False)
+        
+        # 同时保存为可读的文本格式
+        summary_txt_file = os.path.join(self.log_dir, 'training_summary.txt')
+        with open(summary_txt_file, 'w', encoding='utf-8') as f:
+            f.write("训练摘要\n")
+            f.write("="*60 + "\n\n")
+            for key, value in summary_data.items():
+                f.write(f"{key}: {value}\n")
+        
+        print(f"📝 Training summary saved to: {self.log_dir}")
     
     def close(self):
         """关闭日志记录器"""

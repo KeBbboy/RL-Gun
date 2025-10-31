@@ -559,11 +559,11 @@ class MADDPGAgentTrainer(AgentTrainer):
 
         # 2) 采样
         if self.args.use_per:
-            obs_b, glob_b, act_b, rew_b, next_obs_all_b, next_glob_b, done_b, idxs, weights = \
-                self.buffer.sample(self.args.batch_size)
+            (obs_b, glob_b, act_b, rew_b, next_obs_all_b, next_glob_b, done_b, 
+             idxs, weights, masks_b, next_masks_b) = self.buffer.sample(self.args.batch_size)
         else:
-            obs_b, glob_b, act_b, rew_b, next_obs_all_b, next_glob_b, done_b = \
-                self.buffer.sample(self.args.batch_size)
+            (obs_b, glob_b, act_b, rew_b, next_obs_all_b, next_glob_b, done_b,
+             masks_b, next_masks_b) = self.buffer.sample(self.args.batch_size)
             weights, idxs = None, None
         print(f"   📦 Batch shapes: obs={np.shape(obs_b)}, glob={np.shape(glob_b)}, act={np.shape(act_b)}, "
             f"next_obs_all={np.shape(next_obs_all_b)}, next_glob={np.shape(next_glob_b)}")
@@ -727,5 +727,9 @@ class MADDPGAgentTrainer(AgentTrainer):
             print(f"✅ Target networks updated with tau={tau}")
 
         # print("   Press ENTER to continue to next step...")
-        # input("⏸️ 本次 actor-critic 训练完成，按回车继续...") 
+        # input("⏸️ 本次 actor-critic 训练完成，按回车继续...")
         return critic_loss, actor_loss
+
+
+# 别名以匹配__init__.py中的导出
+COMAAgentTrainer = MADDPGAgentTrainer

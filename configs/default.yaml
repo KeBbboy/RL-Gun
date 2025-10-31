@@ -24,7 +24,7 @@ environment:
   # 时空参数
   horizon: 200        # 时间范围（分钟）
   area_size: 15.0     # 区域大小（千米）
-  road_damage_ratio: 0.3  # 道路损坏比例（只能由无人机访问的节点）
+  road_damage_ratio: 0.1  # 道路损坏比例（只能由无人机访问的节点）
   
   # 动态节点配置
   dynamic_nodes:
@@ -45,27 +45,30 @@ node:
 
 # ========== 训练配置 ==========
 training:
-  num_episodes: 1000
+  num_episodes: 2000
   max_episode_len: 1000
   
   # 批量和缓冲区
-  batch_size: 256
-  min_buffer_size: 5000
+  batch_size: 128          # Mini-batch大小
+  min_buffer_size: 10000   # Replay buffer大小
   
   # 更新频率
-  update_freq: 10           # 每隔多少步更新一次
+  update_freq: 10            # 更频繁的更新（原10）
   target_update_freq: 100   # 目标网络更新频率
-  updates_per_call: 1       # 每次触发做几次梯度步
+  updates_per_call: 1       # 每次触发做更多梯度步（原1）
   
   # 学习率
-  lr_actor: 1.0e-4
-  lr_critic: 3.0e-4
+  lr_actor: 1.0e-4         # Actor学习率: 0.0001
+  lr_critic: 1.0e-4        # Critic学习率: 0.0001
   
   # 探索和正则化
-  warmup_steps: 3000        # 预热步数
+  warmup_steps: 1000        # 减少预热步数以更早开始训练
+  epsilon_max: 1.0          # Epsilon最大值（探索）
+  epsilon_min: 0.1          # Epsilon最小值（探索）
+  epsilon_decay_steps: 30000  # Epsilon衰减步数
   entropy_coef: 0.01        # 熵系数
   tau: 0.01                 # 软更新系数
-  gamma: 0.95               # 折扣因子
+  gamma: 0.9                # 折扣因子 (discount factor)
   
   # On-policy算法参数（MA2C, MAPPO）
   rollout_len: 25           # 分段回合长度
@@ -94,7 +97,7 @@ network:
 
 # ========== 特性开关 ==========
 features:
-  use_per: false            # 是否使用优先经验回放
+  use_per: true           # 是否使用优先经验回放
   use_iam: true             # 是否使用无效动作掩码
   visualize: false          # 是否启用可视化
   visualize_interval: 1     # 可视化间隔（每N个episode）
@@ -109,5 +112,5 @@ logging:
 
 # ========== 算法选择 ==========
 algorithm:
-  name: maddpg              # maddpg, iql, ma2c, coma, cima, mappo
+  name: maddpg              # maddpg, ma2c, coma, cima, mappo
 

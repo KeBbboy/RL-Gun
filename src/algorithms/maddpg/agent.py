@@ -496,7 +496,28 @@ class MADDPGAgentTrainer(AgentTrainer):
         obs = np.asarray(obs, dtype=np.float32)
         global_obs = np.asarray(global_obs, dtype=np.float32)
         next_global_obs = np.asarray(next_global_obs, dtype=np.float32)
-        
+
+        # 关键修复：处理act_all确保形状一致
+        if isinstance(act_all, list):
+            processed_actions = []
+            max_action_heads = max(len(np.asarray(a).reshape(-1)) for a in act_all)
+
+            for agent_act in act_all:
+                act_array = np.asarray(agent_act, dtype=np.int32).reshape(-1)
+                # 填充到最大动作头数
+                if len(act_array) < max_action_heads:
+                    padded_act = np.zeros(max_action_heads, dtype=np.int32)
+                    padded_act[:len(act_array)] = act_array
+                    processed_actions.append(padded_act)
+                else:
+                    processed_actions.append(act_array)
+
+            act_all = np.stack(processed_actions, axis=0)  # (n_agents, max_action_heads)
+        else:
+            act_all = np.asarray(act_all, dtype=np.int32)
+            if act_all.ndim == 1:
+                act_all = act_all.reshape(1, -1)
+
         # 关键修复：处理next_obs_all确保格式正确
         if isinstance(next_obs_all, list):
             processed_next_obs = []
@@ -581,7 +602,8 @@ class MADDPGAgentTrainer(AgentTrainer):
         else:
             (obs_b, glob_b, act_b, rew_b,
             next_obs_all_b, next_glob_b, done_b,
-            _, _, masks_b, next_masks_b) = (*self.buffer.sample(self.args.batch_size), None, None, None, None)
+            masks_b, next_masks_b) = self.buffer.sample(self.args.batch_size)
+            idxs, weights = None, None
         print("   [debug] masks_b is None?", masks_b is None, 
                 "/ next_masks_b is None?", next_masks_b is None)
         # 批次是否有掩码 & 形状
